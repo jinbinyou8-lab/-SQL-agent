@@ -1,0 +1,30 @@
+# ---- 虚拟环境（299MB，绝不入库）----
+venv/
+.venv/
+env/
+
+# ---- Python 缓存 ----
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+
+# ---- IDE ----
+.idea/
+.vscode/
+
+# ---- 日志 ----
+logs/
+*.log
+
+# ---- 密钥类 ----
+.env
+.env.*
+!.env.example
+
+# ---- 临时目录 ----
+temp_data/
+import_temp_dir/
+output_temp_dir/
