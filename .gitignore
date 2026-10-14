@@ -23,6 +23,8 @@ logs/
 .env
 .env.*
 !.env.example
+# 本地私有配置(含数据库密码/内网地址), 不入库; 请参考 conf/app_config.example.yaml
+conf/app_config.yaml
 
 # ---- 临时目录 ----
 temp_data/

@@ -1,0 +1,61 @@
+from dataclasses import asdict
+
+from qdrant_client import AsyncQdrantClient, models
+from qdrant_client.http.models import VectorParams, Distance, PointStruct
+from sqlalchemy.util import await_
+
+from app.conf.app_config import QdrantConfig, app_config
+from app.entities.column_info import ColumnInfo
+
+
+class ColumnQdrantRepository:
+
+    collection_name = "data-agent-column"
+
+    """用于操作字段信息向量集合持久层"""
+    def __init__(self,client:AsyncQdrantClient):
+        self.client = client
+
+
+
+    async def ensure_collection(self):
+        #1. 判断集合是否存在
+        if not await self.client.collection_exists(collection_name=self.collection_name):
+            #2.创建集合
+            await self.client.create_collection(
+                collection_name=self.collection_name,
+                vectors_config=VectorParams(
+                    size=app_config.qdrant.embedding_size,
+                    distance=models.Distance.COSINE
+                )
+            )
+
+    async def recreate_collection(self):
+        #1. 集合已存在则先删除, 否则重复执行会不断追加新的向量点(uuid4 每次都是新的)
+        if await self.client.collection_exists(collection_name=self.collection_name):
+            await self.client.delete_collection(collection_name=self.collection_name)
+        #2. 重新创建集合
+        await self.client.create_collection(
+            collection_name=self.collection_name,
+            vectors_config=VectorParams(
+                size=app_config.qdrant.embedding_size,
+                distance=models.Distance.COSINE
+            )
+        )
+
+    async def upsert(self, ids:list[str], embeddings:list[list[float]], payloads:list[ColumnInfo], batch_size = 10):
+        #1. 使用zip函数 按照索引"打包"为元组迭代器[(id,vector,column_info)]
+        zipped = list(zip(ids, embeddings, payloads))
+
+        #2. 分批次插入向量数据
+        for i in range(0, len(zipped), batch_size):
+            batch = zipped[i:i + batch_size]
+            points = [
+                PointStruct(
+                    id = id,
+                    vector = embedding,
+                    payload=asdict(payload)
+                ) for id,embedding,payload in batch
+            ]
+            await self.client.upsert(collection_name=self.collection_name, points=points)
+
