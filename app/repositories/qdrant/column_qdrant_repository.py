@@ -59,3 +59,11 @@ class ColumnQdrantRepository:
             ]
             await self.client.upsert(collection_name=self.collection_name, points=points)
 
+    async def search(self, embedding: list[float], score:float=0.7, limit: int = 10) -> list[ColumnInfo]:
+        response = await self.client.query_points(
+            collection_name=self.collection_name,
+            query=embedding,
+            limit=limit,
+            score_threshold=score,
+        )
+        return [ColumnInfo(**point.payload) for point in response.points]

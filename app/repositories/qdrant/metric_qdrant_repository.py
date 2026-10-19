@@ -1,6 +1,7 @@
 from dataclasses import asdict
 
 from qdrant_client import AsyncQdrantClient, models
+from qdrant_client.fastembed_common import QueryResponse
 from qdrant_client.http.models import PointStruct
 
 from app.conf.app_config import app_config
@@ -36,3 +37,12 @@ class MetricQdrantRepository:
                 ) for id, embedding, payload in batch
             ]
             await self.client.upsert(collection_name=self.collection_name,points=points)
+
+    async def search(self, embedding:list[float], score:float=0.7, limit:int=10) -> list[MetricInfo]:
+        result: QueryResponse = await self.client.query_points(
+            collection_name=self.collection_name,
+            query=embedding,
+            score_threshold=score,
+            limit=limit
+        )
+        return [MetricInfo(**point.payload) for point in result.points]
