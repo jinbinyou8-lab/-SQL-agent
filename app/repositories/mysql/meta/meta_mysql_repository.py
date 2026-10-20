@@ -1,9 +1,12 @@
+from sqlalchemy import select, ScalarResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.entities.column_info import ColumnInfo
 from app.entities.column_metric import ColumnMetric
 from app.entities.metric_info import MetricInfo
 from app.entities.table_info import TableInfo
+from app.models.column_info_mysql import ColumnInfoMySQL
+from app.models.table_info_mysql import TableInfoMySQL
 from app.repositories.mysql.meta.mappers.column_info_mapper import ColumnInfoMapper
 from app.repositories.mysql.meta.mappers.column_metric_mapper import ColumnMetricMapper
 from app.repositories.mysql.meta.mappers.metric_info_mapper import MetricInfoMapper
@@ -42,3 +45,17 @@ class MetaMySQLRepository:
         models = [ColumnMetricMapper.to_model(column_metric_info) for column_metric_info in column_metric_infos]
         for model in models:
             await self.session.merge(model)
+
+    async def get_column_info(self, column_id) -> ColumnInfo:
+        """根据字段ID查询字段信息"""
+        column_info_mysql: ColumnInfoMySQL | None = await self.session.get(ColumnInfoMySQL, column_id)
+        return ColumnInfoMapper.to_entity(column_info_mysql)
+
+    async def get_key_columns(self, table_id:str) -> list[ColumnInfo]:
+        stmt = select(ColumnInfoMySQL).where(ColumnInfoMySQL.table_id == table_id, ColumnInfoMySQL.role.in_(["primary_key", "foreign_key"]) )
+        result:ScalarResult = await self.session.scalars(stmt)
+        return [ColumnInfoMapper.to_entity(column_info_mysql) for column_info_mysql in result]
+
+    async def get_table_info(self, table_id:str) -> TableInfo:
+        table_info_mysql: TableInfoMySQL | None = await self.session.get(TableInfoMySQL, table_id)
+        return TableInfoMapper.to_entity(table_info_mysql)

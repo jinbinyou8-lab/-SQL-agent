@@ -77,16 +77,23 @@ if __name__ == "__main__":
         embedding_client_manager.init()
         qdrant_client_manager.init()
         es_client_manager.init()
-        context = DataAgentContext(
-            embedding_client=embedding_client_manager.client,
-            column_qdrant_repository=ColumnQdrantRepository(qdrant_client_manager.client),
-            metric_qdrant_repository=MetricQdrantRepository(qdrant_client_manager.client),
-            value_es_repository=ValueESRepository(es_client_manager.client),
-        )
-        async for chunk in graph.astream(input=DataAgentState(query="统计华北地区销售总额"), context=context, stream_mode="custom"):
-            print(chunk)
+        meta_mysql_client_manager.init()
+        dw_mysql_client_manager.init()
+        async with (meta_mysql_client_manager.session_factory() as meta_session, dw_mysql_client_manager.session_factory() as dw_session):
+            context = DataAgentContext(
+                embedding_client=embedding_client_manager.client,
+                column_qdrant_repository=ColumnQdrantRepository(qdrant_client_manager.client),
+                metric_qdrant_repository=MetricQdrantRepository(qdrant_client_manager.client),
+                value_es_repository=ValueESRepository(es_client_manager.client),
+                meta_mysql_repository=MetaMySQLRepository(meta_session),
+                dw_mysql_repository=DWMySQLRepository(dw_session),
+            )
+            async for chunk in graph.astream(input=DataAgentState(query="统计华北地区销售总额"), context=context, stream_mode="custom"):
+                print(chunk)
         await qdrant_client_manager.close()
         await es_client_manager.close()
+        await dw_mysql_client_manager.close()
+        await meta_mysql_client_manager.close()
 
     asyncio.run(test_graph())
 
