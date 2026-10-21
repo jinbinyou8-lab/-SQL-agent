@@ -1,0 +1,28 @@
+# 运行环境: Python 3.12+ (开发验证版本 3.12.15)
+# 安装: pip install -r requirements.txt --no-cache-dir
+
+# ---- Web 服务 ----
+fastapi==0.153.0
+uvicorn==0.54.0
+
+# ---- Agent 编排 ----
+langgraph==1.2.15
+langchain-core==1.6.10
+langchain-openai==1.7.1
+langchain-huggingface==1.2.0
+openai==3.31.0
+
+# ---- 向量库 / 搜索引擎 ----
+qdrant-client==1.16.2
+elasticsearch==8.19.3
+
+# ---- 关系型数据库 ----
+SQLAlchemy==2.1.4
+asyncmy==0.2.16
+
+# ---- 配置 / 日志 / 工具 ----
+omegaconf==2.4.0
+PyYAML==6.0.3
+loguru==0.7.3
+aiohttp==3.14.4
+numpy==2.5.3
