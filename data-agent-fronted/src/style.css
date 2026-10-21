@@ -1,0 +1,65 @@
+/* 全局基础样式（浅色主题）
+ *
+ * 注意：这里不要用 Vite 脚手架默认的
+ *   color: rgba(255, 255, 255, 0.87) + background-color: #242424
+ * 那套是「深色优先 + prefers-color-scheme 兜底」的模板样式。
+ * 一旦浏览器/系统处于暗色模式，文字会变成白色，
+ * 而 App.vue 里的 .chat-page 又是固定的白底，最终就是白底白字看不清。
+ * 本项目统一按浅色主题来，文字固定为深灰。
+ */
+
+:root {
+  font-family: system-ui, -apple-system, "Segoe UI", "PingFang SC",
+    "Microsoft YaHei", Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  /* 固定亮色，不跟随系统暗色模式 */
+  color-scheme: light;
+  color: #1f2329;
+  background-color: #ffffff;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-width: 320px;
+  color: #1f2329;
+  background-color: #ffffff;
+}
+
+a {
+  font-weight: 500;
+  color: #3370ff;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #245bdb;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* 占位符保持可见的浅灰，避免在浅色背景上"消失" */
+::placeholder {
+  color: #9aa0ab;
+  opacity: 1;
+}
